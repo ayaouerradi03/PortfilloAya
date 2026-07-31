@@ -1,0 +1,405 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Dongle — self-hosted so its metrics can be corrected.
+
+   Dongle is drawn for Korean, so at a given font-size its Latin cap-height is
+   roughly a third smaller than Inter's and its default line box is enormous.
+   `size-adjust` scales the glyphs back into line and the ascent/descent
+   overrides tame the leading, which means every heading size already in the
+   design keeps working unchanged.
+   ========================================================================== */
+@font-face {
+  font-family: 'Dongle';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  size-adjust: 176%;
+  ascent-override: 78%;
+  descent-override: 19%;
+  line-gap-override: 0%;
+  src: url('/fonts/dongle-400-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Dongle';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  size-adjust: 176%;
+  ascent-override: 78%;
+  descent-override: 19%;
+  line-gap-override: 0%;
+  src: url('/fonts/dongle-400-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Dongle';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  size-adjust: 176%;
+  ascent-override: 78%;
+  descent-override: 19%;
+  line-gap-override: 0%;
+  src: url('/fonts/dongle-700-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Dongle';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  size-adjust: 176%;
+  ascent-override: 78%;
+  descent-override: 19%;
+  line-gap-override: 0%;
+  src: url('/fonts/dongle-700-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+/* ==========================================================================
+   Design tokens — Dragonfruit /FF4696/ + Night Violet /1E1033/
+   ========================================================================== */
+@theme {
+  --color-dragonfruit: #ff4696;
+  --color-dragonfruit-soft: #ff7fb6;
+  --color-dragonfruit-deep: #c92a6d;
+  --color-night: #1e1033;
+  --color-night-deep: #120a20;
+  --color-night-lift: #2b1749;
+  --color-orchid: #b19eef;
+
+  --font-display: 'Dongle', 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  :root {
+    /* Liquid-glass surface recipe.
+       The fill is a dark violet veil rather than the usual white one: the gooey
+       field behind is fully saturated, and a white veil over it would wash out
+       body copy. Tinting dark keeps text crisp while the blur still pulls the
+       colour through — which is what makes the panels read as glass. */
+    --glass-bg: color-mix(in oklab, #150a2b 46%, transparent);
+    --glass-bg-strong: color-mix(in oklab, #150a2b 62%, transparent);
+    --glass-edge: color-mix(in oklab, #ffffff 20%, transparent);
+    --glass-edge-bright: color-mix(in oklab, #ffffff 48%, transparent);
+    --glass-blur: 26px;
+
+    --page-x: clamp(1.25rem, 5vw, 6rem);
+    color-scheme: dark;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Anchor offset so the sticky header never covers a section title */
+    scroll-padding-top: 6.5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--color-night-deep);
+    color: #f4eefb;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-dragonfruit);
+    color: #14081f;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-night-deep);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--color-dragonfruit), var(--color-dragonfruit-deep));
+    border-radius: 99px;
+    border: 3px solid var(--color-night-deep);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-dragonfruit);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+/* ==========================================================================
+   Liquid Glass primitives
+   ========================================================================== */
+@utility glass {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(165%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(165%);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    0 18px 50px -18px rgba(6, 2, 14, 0.85),
+    inset 0 1px 0 0 var(--glass-edge-bright),
+    inset 0 -1px 0 0 color-mix(in oklab, #ffffff 8%, transparent),
+    inset 0 -22px 44px -32px rgba(255, 70, 150, 0.55);
+}
+
+/* The specular sheen that makes glass read as "liquid": a light band drifting
+   across the top-left of every glass surface. */
+@utility glass-sheen {
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        120% 100% at 12% 0%,
+        color-mix(in oklab, #ffffff 20%, transparent) 0%,
+        transparent 55%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, #ffffff 12%, transparent) 0%,
+        transparent 35%,
+        transparent 65%,
+        color-mix(in oklab, var(--color-dragonfruit) 12%, transparent) 100%
+      );
+    opacity: 0.85;
+    transition: opacity 0.5s var(--ease-glass);
+  }
+}
+
+/* Pointer-tracked refraction highlight. Components set --mx / --my on move. */
+@utility glass-lens {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in oklab, var(--color-dragonfruit) 26%, transparent) 0%,
+      color-mix(in oklab, var(--color-orchid) 10%, transparent) 40%,
+      transparent 70%
+    );
+    transition: opacity 0.45s var(--ease-glass);
+  }
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+@utility glass-panel {
+  border-radius: 1.5rem;
+}
+
+/* ==========================================================================
+   Typography helpers
+   ========================================================================== */
+/* Kept deliberately light: the gooey field behind runs to full-strength
+   dragonfruit, so ending this gradient on the same pink would sink into it. */
+@utility text-gradient {
+  background: linear-gradient(100deg, #ffffff 0%, #ffd9e9 42%, #ff9ec8 78%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@utility eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--color-dragonfruit-soft) 88%, white);
+}
+
+/* ==========================================================================
+   Scroll reveal
+   ========================================================================== */
+@layer components {
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+    filter: blur(6px);
+    transition:
+      opacity 0.9s var(--ease-glass),
+      transform 0.9s var(--ease-glass),
+      filter 0.9s var(--ease-glass);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     Journey milestones — lit purely from --journey-progress, published by
+     <JourneyLine> on the [data-journey-root] wrapper. No React re-render
+     happens while scrolling.
+     ------------------------------------------------------------------ */
+  .journey-node {
+    --lit: clamp(0, calc((var(--journey-progress, 0) - var(--node-at, 0)) * 26), 1);
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    transform: translateX(var(--node-x, 0px));
+    transition: box-shadow 0.6s var(--ease-glass);
+  }
+
+  .journey-node::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid color-mix(in oklab, #ffffff 24%, transparent);
+    background: color-mix(in oklab, var(--color-night-deep) 88%, transparent);
+  }
+
+  .journey-node::after {
+    content: '';
+    position: relative;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: color-mix(
+      in oklab,
+      var(--color-dragonfruit) calc(var(--lit) * 100%),
+      color-mix(in oklab, #ffffff 30%, transparent)
+    );
+    box-shadow: 0 0 calc(var(--lit) * 18px) calc(var(--lit) * 3px)
+      color-mix(in oklab, var(--color-dragonfruit) calc(var(--lit) * 75%), transparent);
+    transform: scale(calc(0.8 + var(--lit) * 0.5));
+    transition:
+      transform 0.5s var(--ease-glass),
+      background 0.5s var(--ease-glass);
+  }
+
+  /* Year label riding next to a milestone, fading in as the line reaches it */
+  .journey-year {
+    opacity: clamp(0.35, calc(0.35 + var(--lit, 0) * 0.65), 1);
+    transition: opacity 0.5s var(--ease-glass);
+  }
+}
+
+/* ==========================================================================
+   Ambient motion
+   ========================================================================== */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -26px, 0) scale(1.06);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(-3%, 0, 0);
+  }
+  50% {
+    transform: translate3d(3%, -4%, 0);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-dragonfruit) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility animate-float-slow {
+  animation: float-slow 14s ease-in-out infinite;
+}
+@utility animate-drift {
+  animation: drift 22s ease-in-out infinite;
+}
+@utility animate-pulse-ring {
+  animation: pulse-ring 2.6s ease-out infinite;
+}
+@utility animate-marquee {
+  animation: marquee 38s linear infinite;
+}
+
+/* Filmic noise overlay */
+@utility grain {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
