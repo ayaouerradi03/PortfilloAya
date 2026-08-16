@@ -11,7 +11,9 @@
       "Bash(lsof -nP -iTCP -sTCP:LISTEN)",
       "Bash(awk '{print $1, $2, $9}')",
       "Bash(awk '{print $2, $11, $12, $13}')",
-      "Bash(curl -s -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0 Safari/537.36\" \"https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap\")"
+      "Bash(curl -s -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0 Safari/537.36\" \"https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap\")",
+      "Bash(python3 -)",
+      "Bash(npx oxlint *)"
     ]
   }
 }

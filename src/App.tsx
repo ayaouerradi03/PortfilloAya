@@ -5,8 +5,10 @@ import { Education } from './components/Education'
 import { Experience } from './components/Experience'
 import { Footer } from './components/Footer'
 import { Hero } from './components/Hero'
+import { Interests } from './components/Interests'
 import { Nav } from './components/Nav'
 import { Skills } from './components/Skills'
+import { WhyMe } from './components/WhyMe'
 import { LanguageProvider } from './i18n/LanguageProvider'
 
 export function App() {
@@ -26,6 +28,8 @@ export function App() {
           <Experience />
           <Education />
           <Skills />
+          <WhyMe />
+          <Interests />
           <Contact />
         </main>
 

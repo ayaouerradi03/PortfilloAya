@@ -1,34 +1,38 @@
 /* =========================================================================
-   Gooey gradient field — Dragonfruit /FF4696/ + Night Violet /1E1033/
+   Gooey gradient field — Deep navy /04060C/ + Violet /8B5CF6/ + Cyan /06B6D4/
 
    The reference implementation, recoloured to the brand palette and run at
-   full strength. Five blobs drift on CSS keyframes and a sixth follows the
+   low opacity — at full strength the blobs read as loud saturated lava and
+   compete with the content, so they sit at ~0.3 alpha and act as ambient
+   depth. Five blobs drift on CSS keyframes and a sixth follows the
    pointer; the #gooey-merge filter blurs them hard and then crushes the alpha
    ramp so overlapping blobs fuse into one liquid surface instead of
-   cross-fading.
+   cross-fading. Blend mode is `screen` rather than the old `hard-light` — on
+   a near-black base, `screen` reads as a clean glow instead of the harsh,
+   blown-out patches `hard-light` produces against saturated colour.
 
    The `filter` on .gooey-blobs isolates the group, so the blobs'
-   `mix-blend-mode: hard-light` blends them with each other and never with the
+   `mix-blend-mode: screen` blends them with each other and never with the
    page. That isolation is what keeps this artefact-free under the glass
    panels stacked above it.
    ========================================================================= */
 
 .gooey-field {
-  --gooey-c1: 255, 70, 150; /* dragonfruit      */
-  --gooey-c2: 177, 158, 239; /* orchid           */
-  --gooey-c3: 255, 127, 182; /* dragonfruit soft */
-  --gooey-c4: 201, 42, 109; /* dragonfruit deep */
-  --gooey-c5: 124, 77, 214; /* violet           */
-  --gooey-pointer: 255, 70, 150;
+  --gooey-c1: 139, 92, 246; /* violet       */
+  --gooey-c2: 6, 182, 212; /* cyan          */
+  --gooey-c3: 196, 181, 253; /* violet soft */
+  --gooey-c4: 109, 40, 217; /* violet deep */
+  --gooey-c5: 8, 47, 73; /* deep cyan-navy */
+  --gooey-pointer: 139, 92, 246;
 
   --gooey-size: 80%;
-  --gooey-blend: hard-light;
+  --gooey-blend: screen;
   --gooey-softness: 40px;
 
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: linear-gradient(40deg, #6b1359 0%, #3a1a5f 46%, #1e1033 100%);
+  background: linear-gradient(40deg, #0b0a1a 0%, #06080f 46%, #04060c 100%);
 }
 
 /* Filter host — kept out of flow and out of the paint. */
@@ -60,7 +64,7 @@
 .gooey-blob-1 {
   background: radial-gradient(
       circle at center,
-      rgba(var(--gooey-c1), 0.8) 0,
+      rgba(var(--gooey-c1), 0.32) 0,
       rgba(var(--gooey-c1), 0) 50%
     )
     no-repeat;
@@ -70,7 +74,7 @@
 .gooey-blob-2 {
   background: radial-gradient(
       circle at center,
-      rgba(var(--gooey-c2), 0.8) 0,
+      rgba(var(--gooey-c2), 0.32) 0,
       rgba(var(--gooey-c2), 0) 50%
     )
     no-repeat;
@@ -83,7 +87,7 @@
 .gooey-blob-3 {
   background: radial-gradient(
       circle at center,
-      rgba(var(--gooey-c3), 0.8) 0,
+      rgba(var(--gooey-c3), 0.32) 0,
       rgba(var(--gooey-c3), 0) 50%
     )
     no-repeat;
@@ -96,7 +100,7 @@
 .gooey-blob-4 {
   background: radial-gradient(
       circle at center,
-      rgba(var(--gooey-c4), 0.8) 0,
+      rgba(var(--gooey-c4), 0.32) 0,
       rgba(var(--gooey-c4), 0) 50%
     )
     no-repeat;
@@ -108,7 +112,7 @@
 .gooey-blob-5 {
   background: radial-gradient(
       circle at center,
-      rgba(var(--gooey-c5), 0.8) 0,
+      rgba(var(--gooey-c5), 0.32) 0,
       rgba(var(--gooey-c5), 0) 50%
     )
     no-repeat;
@@ -128,11 +132,11 @@
   left: -50%;
   background: radial-gradient(
       circle at center,
-      rgba(var(--gooey-pointer), 0.8) 0,
+      rgba(var(--gooey-pointer), 0.32) 0,
       rgba(var(--gooey-pointer), 0) 50%
     )
     no-repeat;
-  opacity: 0.7;
+  opacity: 0.45;
   animation: none;
 }
 

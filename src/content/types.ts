@@ -15,6 +15,7 @@ export type IconName =
   | 'globe'
   | 'users'
   | 'spark'
+  | 'cap'
 
 /** One card = one concrete mission inside an experience. */
 export interface TaskCardData {
@@ -22,9 +23,18 @@ export interface TaskCardData {
   icon: IconName
   tag: string
   title: string
-  detail: string
+  /** Short summary paragraph — used when `bullets` isn't provided. */
+  detail?: string
+  /** Detailed breakdown, rendered as a list instead of a paragraph. */
+  bullets?: string[]
   /** Small keyword chips rendered at the bottom of the card. */
-  keywords: string[]
+  keywords?: string[]
+}
+
+/** One category of tools/practices inside an experience's context panel. */
+export interface ToolGroupData {
+  label: string
+  items: string[]
 }
 
 export interface ExperienceData {
@@ -36,6 +46,11 @@ export interface ExperienceData {
   period: string
   /** Short framing line under the header, above the task cards. */
   summary: string
+  /** Deeper "what this role actually involves" panel, shown above the missions grid. */
+  context?: {
+    body: string[]
+    toolGroups: ToolGroupData[]
+  }
   tasks: TaskCardData[]
 }
 
@@ -50,9 +65,13 @@ export interface EducationData {
 export interface CertificationData {
   id: string
   name: string
+  /** Short code used in compact spots (e.g. the hero card) — "PSPO II", "AZ-900". */
+  shortName: string
   issuer: string
   status: 'earned' | 'in-progress'
   statusLabel: string
+  /** Link to the public credential (badge, transcript). Card becomes clickable when set. */
+  credentialUrl?: string
 }
 
 export interface SkillGroupData {
@@ -65,14 +84,21 @@ export interface LanguageData {
   id: string
   name: string
   level: string
-  /** 0–100, used for the glass meter. */
-  score: number
   note: string
 }
 
 export interface StatData {
   value: string
   label: string
+}
+
+/** One title + description item, optionally led by an icon. */
+export interface IconCardData {
+  id: string
+  /** Omitted where the layout leads with a numeral or rule instead (see WhyMe). */
+  icon?: IconName
+  title: string
+  detail: string
 }
 
 export interface NavItem {
@@ -95,15 +121,21 @@ export interface SiteContent {
   }
   hero: {
     availability: string
-    greeting: string
     name: string
     role: string
-    tagline: string
+    /** Hero statement, split so the payoff half can take the accent colour. */
+    taglineLead: string
+    taglineAccent: string
     intro: string
     primaryCta: string
     secondaryCta: string
-    scrollHint: string
     stats: StatData[]
+  }
+  /** Copy specific to the current-role card next to the hero heading. */
+  heroCard: {
+    availabilityLabel: string
+    availabilityValue: string
+    focusAreas: string[]
   }
   about: {
     eyebrow: string
@@ -116,9 +148,9 @@ export interface SiteContent {
     eyebrow: string
     title: string
     subtitle: string
-    journeyLabel: string
     presentLabel: string
     missionsLabel: (n: number) => string
+    toolsLabel: string
   }
   experiences: ExperienceData[]
   education: {
@@ -138,6 +170,18 @@ export interface SiteContent {
     title: string
     subtitle: string
     groups: SkillGroupData[]
+  }
+  whyMe: {
+    eyebrow: string
+    title: string
+    subtitle: string
+    items: IconCardData[]
+  }
+  interests: {
+    eyebrow: string
+    title: string
+    subtitle: string
+    items: IconCardData[]
   }
   languages: {
     eyebrow: string
@@ -159,7 +203,6 @@ export interface SiteContent {
     linkedin: string
     linkedinHref: string
     cta: string
-    availability: string
   }
   footer: {
     built: string

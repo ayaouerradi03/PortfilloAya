@@ -1,4 +1,4 @@
-import type { ElementType, HTMLAttributes, ReactNode, Ref } from 'react'
+import { Fragment, type CSSProperties, type ElementType, type HTMLAttributes, type ReactNode, type Ref } from 'react'
 import { GLASS_SURFACE, trackGlassPointer } from '@/lib/glass'
 
 interface GlassCardProps extends HTMLAttributes<HTMLElement> {
@@ -22,7 +22,7 @@ export function GlassCard({
       className={[
         GLASS_SURFACE,
         interactive
-          ? 'hover:-translate-y-1 hover:border-white/35 hover:shadow-[0_30px_70px_-24px_rgba(255,70,150,0.45)]'
+          ? 'hover:-translate-y-3 hover:border-violet/40 hover:shadow-[0_0_20px_-10px_rgba(139,92,246,0.4)]'
           : '',
         className,
       ]
@@ -45,7 +45,7 @@ export function Container({
   className?: string
 }) {
   return (
-    <div className={`mx-auto w-full max-w-6xl px-5 sm:px-8 lg:px-12 ${className}`}>{children}</div>
+    <div className={`mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-16 ${className}`}>{children}</div>
   )
 }
 
@@ -64,32 +64,77 @@ export function Section({ id, className = '', children, ...rest }: SectionProps)
   )
 }
 
+/**
+ * Splits `text` into words (so a line only ever breaks between them) of
+ * individually-staggered letter spans, keyed off the ancestor
+ * `.reveal.is-visible` toggle via the `.char-fade-in` class in index.css.
+ *
+ * The stagger is capped rather than scaling with the string length: on a
+ * long, multi-line title (e.g. the About heading, 60+ characters) an
+ * uncapped 0.02s-per-char stagger pushes the last letters' start past the
+ * 1s mark, so a normal scroll speed carries the heading to the centre of
+ * the viewport while it's still visibly half-blurred. Capping the index
+ * keeps the whole reveal inside ~0.6s regardless of title length.
+ */
+const MAX_STAGGERED_CHARS = 18
+const CHAR_STAGGER_SECONDS = 0.018
+
+function AnimatedTitle({ text }: { text: string }) {
+  const words = text.split(' ')
+  let index = 0
+
+  return (
+    <>
+      {words.map((word, wordIndex) => (
+        <Fragment key={word + wordIndex}>
+          <span className="inline-block">
+            {word.split('').map((char) => {
+              const delay = Math.min(index, MAX_STAGGERED_CHARS) * CHAR_STAGGER_SECONDS
+              index += 1
+              return (
+                <span
+                  key={index}
+                  className="char-fade-in"
+                  style={{ '--char-delay': `${delay}s` } as CSSProperties}
+                >
+                  {char}
+                </span>
+              )
+            })}
+          </span>
+          {wordIndex < words.length - 1 ? ' ' : ''}
+        </Fragment>
+      ))}
+    </>
+  )
+}
+
 export function SectionHeading({
   eyebrow,
   title,
   subtitle,
-  align = 'left',
+  index,
 }: {
   eyebrow: string
   title: string
   subtitle?: string
-  align?: 'left' | 'center'
+  /** 1-based position in the page. Rendered as an editorial "01 —" marker. */
+  index?: number
 }) {
-  const centered = align === 'center'
   return (
-    <header
-      className={`reveal max-w-3xl ${centered ? 'mx-auto text-center' : ''}`}
-    >
-      <div
-        className={`flex items-center gap-3 ${centered ? 'justify-center' : ''}`}
-      >
-        <span className="h-px w-8 bg-gradient-to-r from-transparent to-dragonfruit" />
+    <header className="reveal max-w-3xl">
+      <div className="flex items-center gap-3">
+        {index !== undefined ? (
+          <span className="font-mono text-[0.72rem] font-semibold text-violet">
+            {String(index).padStart(2, '0')}
+          </span>
+        ) : null}
+        <span className="h-px w-6 bg-gradient-to-r from-violet/70 to-violet/20" />
         <span className="eyebrow">{eyebrow}</span>
-        <span className="h-px w-8 bg-gradient-to-l from-transparent to-dragonfruit" />
       </div>
 
       <h2 className="mt-5 font-display text-[clamp(2rem,4.4vw,3.2rem)] leading-[1.08] font-semibold tracking-tight text-white text-balance">
-        {title}
+        <AnimatedTitle text={title} />
       </h2>
 
       {/* Sits directly on the gooey field rather than on a glass panel, so it
@@ -116,7 +161,7 @@ export function Chip({
     neutral:
       'border-white/14 bg-white/6 text-white/72 hover:border-white/30 hover:bg-white/12 hover:text-white',
     accent:
-      'border-dragonfruit/40 bg-dragonfruit/12 text-dragonfruit-soft hover:border-dragonfruit/70 hover:bg-dragonfruit/20',
+      'border-violet/40 bg-violet/12 text-violet-soft hover:border-violet/70 hover:bg-violet/20',
   } as const
 
   return (

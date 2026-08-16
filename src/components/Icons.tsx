@@ -14,7 +14,6 @@ export type UiIconName =
   | 'clock'
   | 'menu'
   | 'close'
-  | 'cap'
   | 'badge'
   | 'translate'
 

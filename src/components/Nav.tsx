@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLanguage } from '@/i18n/LanguageContext'
 import { Icon } from './Icons'
-import { trackGlassPointer } from '@/lib/glass'
 
-/** Thin dragonfruit bar at the very top showing reading progress. */
+/** Thin violet bar at the very top showing reading progress. */
 function ScrollProgressBar() {
   const barRef = useRef<HTMLDivElement | null>(null)
 
@@ -34,49 +33,53 @@ function ScrollProgressBar() {
   }, [])
 
   return (
-    <div className="fixed inset-x-0 top-0 z-60 h-[2px]">
+    <div className="fixed inset-x-0 top-0 z-60 h-px">
       <div
         ref={barRef}
-        className="h-full origin-left bg-gradient-to-r from-dragonfruit-soft via-dragonfruit to-orchid"
+        className="h-full origin-left bg-gradient-to-r from-violet via-violet-soft to-cyan"
         style={{ transform: 'scaleX(0)' }}
       />
     </div>
   )
 }
 
-function LanguageSwitch({ compact = false }: { compact?: boolean }) {
+function LanguageSwitch() {
   const { locale, setLocale, content } = useLanguage()
 
   return (
     <div
       role="group"
       aria-label={content.nav.langSwitchLabel}
-      className={`glass relative flex items-center rounded-full p-1 ${compact ? '' : 'shrink-0'}`}
-      style={{ '--glass-blur': '14px' } as React.CSSProperties}
+      className="flex items-center gap-0.5 text-[0.72rem] font-medium tracking-[0.08em] uppercase"
     >
-      {/* Sliding pill */}
-      <span
-        aria-hidden="true"
-        className="absolute top-1 bottom-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-gradient-to-br from-dragonfruit to-dragonfruit-deep shadow-[0_6px_18px_-6px_rgba(255,70,150,0.9)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-        style={{ transform: locale === 'en' ? 'translateX(100%)' : 'translateX(0)' }}
-      />
-      {(['fr', 'en'] as const).map((code) => (
-        <button
-          key={code}
-          type="button"
-          onClick={() => setLocale(code)}
-          aria-pressed={locale === code}
-          className={`relative z-10 w-11 rounded-full py-1.5 text-xs font-semibold tracking-widest uppercase transition-colors duration-300 ${
-            locale === code ? 'text-white' : 'text-white/55 hover:text-white/85'
-          }`}
-        >
-          {code}
-        </button>
+      {(['fr', 'en'] as const).map((code, index) => (
+        <span key={code} className="flex items-center">
+          {index > 0 ? <span className="px-1 text-white/20">/</span> : null}
+          <button
+            type="button"
+            onClick={() => setLocale(code)}
+            aria-pressed={locale === code}
+            className={`transition-colors duration-300 ${
+              locale === code ? 'text-white' : 'text-white/35 hover:text-white/70'
+            }`}
+          >
+            {code}
+          </button>
+        </span>
       ))}
     </div>
   )
 }
 
+/**
+ * Borderless navigation.
+ *
+ * The previous version wrapped everything in one floating glass pill, which
+ * read as a detached island sitting on top of the page. Here the logo, links
+ * and actions sit directly on the page and span its full width; only once the
+ * visitor scrolls does a blur and a hairline rule fade in behind them, so the
+ * bar earns its surface instead of always carrying one.
+ */
 export function Nav() {
   const { content } = useLanguage()
   const { items, cta, menu, close } = content.nav
@@ -135,77 +138,76 @@ export function Nav() {
       <ScrollProgressBar />
 
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          scrolled ? 'py-3' : 'py-5'
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+          scrolled
+            ? 'border-b border-white/8 bg-night-deep/70 py-3.5 backdrop-blur-xl'
+            : 'border-b border-transparent py-6'
         }`}
       >
-        <div className="mx-auto w-full max-w-6xl px-5 sm:px-8 lg:px-12">
-          <nav
-            onPointerMove={trackGlassPointer}
-            className={`glass glass-sheen glass-lens flex items-center gap-4 rounded-full pr-2 pl-5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              scrolled ? 'py-2 shadow-[0_20px_50px_-24px_rgba(6,2,14,0.95)]' : 'py-2.5'
-            }`}
-          >
-            {/* Wordmark */}
+        {/* Same track as <Container> so the wordmark lines up with the hero
+            name below it rather than floating on its own grid. */}
+        <nav className="mx-auto flex w-full max-w-7xl items-center gap-8 px-6 sm:px-10 lg:px-16">
+          {/* Wordmark */}
+          <a href="#top" className="group flex shrink-0 items-center gap-2.5" aria-label="Aya Ouerradi">
+            <span className="grid h-7 w-7 place-items-center rounded-md bg-white/8 text-[0.62rem] font-bold tracking-tight text-white/90 transition-colors duration-300 group-hover:bg-violet/25">
+              AO
+            </span>
+            <span className="hidden font-display text-[0.92rem] font-medium tracking-tight text-white/90 transition-colors group-hover:text-white sm:block">
+              Aya Ouerradi
+            </span>
+          </a>
+
+          {/* Desktop links — a marker rule under the active item rather than a
+              filled pill, so nothing boxes the text. */}
+          <ul className="mx-auto hidden items-center gap-7 md:flex">
+            {items.map((item) => {
+              const isActive = active === item.id
+              return (
+                <li key={item.id}>
+                  <a
+                    href={`#${item.id}`}
+                    aria-current={isActive ? 'true' : undefined}
+                    className={`relative block py-1 text-[0.85rem] font-medium transition-colors duration-300 ${
+                      isActive ? 'text-white' : 'text-white/45 hover:text-white/80'
+                    }`}
+                  >
+                    {item.label}
+                    <span
+                      aria-hidden="true"
+                      className={`absolute -bottom-0.5 left-0 h-px bg-violet transition-all duration-300 ${
+                        isActive ? 'w-full opacity-100' : 'w-0 opacity-0'
+                      }`}
+                    />
+                  </a>
+                </li>
+              )
+            })}
+          </ul>
+
+          <div className="ml-auto flex items-center gap-5 md:ml-0">
+            <LanguageSwitch />
+
+            {/* Understated on purpose — the white hero button is the page's
+                primary action, so the persistent nav CTA sits back. */}
             <a
-              href="#top"
-              className="group flex shrink-0 items-center gap-2.5"
-              aria-label="Aya Ouerradi"
+              href="#contact"
+              className="hidden items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-[0.82rem] font-medium text-white/85 transition-colors duration-300 hover:border-white/35 hover:bg-white/6 hover:text-white sm:inline-flex"
             >
-              <span className="relative grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-dragonfruit to-dragonfruit-deep text-[0.8rem] font-bold text-white shadow-[0_8px_22px_-8px_rgba(255,70,150,0.95)]">
-                AO
-              </span>
-              <span className="hidden font-display text-sm font-semibold tracking-tight text-white/90 transition-colors group-hover:text-white sm:block">
-                Aya Ouerradi
-              </span>
+              <Icon name="mail" size={14} />
+              {cta}
             </a>
 
-            {/* Desktop links */}
-            <ul className="mx-auto hidden items-center gap-1 md:flex">
-              {items.map((item) => {
-                const isActive = active === item.id
-                return (
-                  <li key={item.id}>
-                    <a
-                      href={`#${item.id}`}
-                      aria-current={isActive ? 'true' : undefined}
-                      className={`relative block rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300 ${
-                        isActive ? 'text-white' : 'text-white/60 hover:text-white'
-                      }`}
-                    >
-                      {isActive ? (
-                        <span className="absolute inset-0 rounded-full border border-white/16 bg-white/8" />
-                      ) : null}
-                      <span className="relative">{item.label}</span>
-                    </a>
-                  </li>
-                )
-              })}
-            </ul>
-
-            <div className="ml-auto flex items-center gap-2 md:ml-0">
-              <LanguageSwitch />
-
-              <a
-                href="#contact"
-                className="hidden items-center gap-2 rounded-full bg-gradient-to-br from-dragonfruit to-dragonfruit-deep px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_28px_-10px_rgba(255,70,150,0.95)] transition-transform duration-300 hover:-translate-y-0.5 sm:inline-flex"
-              >
-                {cta}
-                <Icon name="arrowRight" size={16} />
-              </a>
-
-              <button
-                type="button"
-                onClick={() => setOpen((v) => !v)}
-                aria-expanded={open}
-                aria-label={open ? close : menu}
-                className="grid h-10 w-10 place-items-center rounded-full border border-white/14 bg-white/6 text-white transition-colors hover:bg-white/12 md:hidden"
-              >
-                <Icon name={open ? 'close' : 'menu'} size={18} />
-              </button>
-            </div>
-          </nav>
-        </div>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-label={open ? close : menu}
+              className="text-white/70 transition-colors hover:text-white md:hidden"
+            >
+              <Icon name={open ? 'close' : 'menu'} size={20} />
+            </button>
+          </div>
+        </nav>
       </header>
 
       {/* Mobile sheet */}
@@ -215,27 +217,27 @@ export function Nav() {
       >
         <div
           onClick={() => setOpen(false)}
-          className={`absolute inset-0 bg-night-deep/70 backdrop-blur-sm transition-opacity duration-400 ${
+          className={`absolute inset-0 bg-night-deep/80 backdrop-blur-md transition-opacity duration-400 ${
             open ? 'opacity-100' : 'opacity-0'
           }`}
         />
         <div
-          className={`glass glass-sheen absolute inset-x-4 top-24 rounded-3xl p-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          className={`absolute inset-x-0 top-0 border-b border-white/8 bg-night-deep/95 px-6 pt-24 pb-8 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             open ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
           }`}
         >
-          <ul className="flex flex-col gap-1">
+          <ul className="flex flex-col">
             {items.map((item, index) => (
               <li key={item.id}>
                 <a
                   href={`#${item.id}`}
                   onClick={() => setOpen(false)}
-                  className="flex items-center justify-between rounded-2xl px-4 py-3.5 text-base font-medium text-white/80 transition-colors hover:bg-white/8 hover:text-white"
+                  className="flex items-baseline gap-4 border-b border-white/6 py-4 text-[1.15rem] font-medium text-white/80 transition-colors hover:text-white"
                 >
-                  {item.label}
-                  <span className="font-mono text-xs text-dragonfruit/70">
-                    0{index + 1}
+                  <span className="font-mono text-[0.7rem] text-violet/60">
+                    {String(index + 1).padStart(2, '0')}
                   </span>
+                  {item.label}
                 </a>
               </li>
             ))}
@@ -243,10 +245,10 @@ export function Nav() {
           <a
             href="#contact"
             onClick={() => setOpen(false)}
-            className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-dragonfruit to-dragonfruit-deep px-5 py-3.5 text-sm font-semibold text-white"
+            className="mt-7 flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3.5 text-sm font-semibold text-night-deep"
           >
+            <Icon name="mail" size={16} />
             {cta}
-            <Icon name="arrowRight" size={16} />
           </a>
         </div>
       </div>

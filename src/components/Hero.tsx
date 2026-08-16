@@ -1,14 +1,49 @@
+import { Fragment, type CSSProperties } from 'react'
 import { useContent } from '@/i18n/LanguageContext'
 import { useReveal } from '@/hooks/useReveal'
 import { trackGlassPointer } from '@/lib/glass'
 import { Icon } from './Icons'
-import { Chip, Container, GlassCard } from './ui'
+import { ShinyText } from './ShinyText'
+import { Container } from './ui'
 
+/**
+ * Fluid oversized heading effect for the hero name: whole words fade + rise
+ * into place, staggered, keyed off the ancestor `.reveal.is-visible` toggle
+ * (see `.word-fade-in` in index.css). The heading's `clamp()` sizing is left
+ * to the caller so it keeps scaling with the viewport as before.
+ */
+function WordFadeIn({ text }: { text: string }) {
+  const words = text.split(' ')
+  return (
+    <>
+      {words.map((word, index) => (
+        <Fragment key={word + index}>
+          <span
+            className="word-fade-in"
+            style={{ '--word-delay': `${index * 90}ms` } as CSSProperties}
+          >
+            {word}
+          </span>
+          {index < words.length - 1 ? ' ' : ''}
+        </Fragment>
+      ))}
+    </>
+  )
+}
+
+/**
+ * Single-column hero.
+ *
+ * The identity card that used to sit on the right was dropped: every field on
+ * it already had a permanent home further down (certifications in Education,
+ * languages in Skills, location and LinkedIn in Contact, focus areas in the
+ * kicker below). Removing it cut the duplication and let the name run at full
+ * width, which is what gives the section its weight.
+ */
 export function Hero() {
-  const content = useContent()
-  const { hero, experiences, contact } = content
-  const current = experiences[0]
+  const { hero, heroCard, contact } = useContent()
   const ref = useReveal<HTMLElement>(0.05)
+  const { taglineLead, taglineAccent } = hero
 
   return (
     <section
@@ -16,172 +51,103 @@ export function Hero() {
       ref={ref}
       /* Padding rather than flex centring: the hero is taller than the
          viewport on short screens, and centring would clip its top. */
-      className="relative min-h-screen pt-32 pb-24 md:pt-40 md:pb-28"
+      className="relative flex min-h-screen flex-col justify-center pt-32 pb-24 md:pt-40 md:pb-28"
     >
       <Container>
-        <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
-          {/* ---------------------------------------------------- copy */}
-          <div>
-            <div className="reveal inline-flex items-center gap-2.5 rounded-full border border-dragonfruit/30 bg-dragonfruit/10 py-2 pr-4 pl-2.5 backdrop-blur-md">
-              <span className="animate-pulse-ring grid h-2 w-2 place-items-center rounded-full bg-dragonfruit" />
-              <span className="text-[0.78rem] font-medium tracking-tight text-dragonfruit-soft">
-                {hero.availability}
-              </span>
-            </div>
-
-            <p
-              className="reveal mt-8 text-sm font-medium tracking-[0.2em] text-white/60 uppercase"
-              style={{ '--reveal-delay': '80ms' } as React.CSSProperties}
-            >
-              {hero.greeting}
-            </p>
-
-            <h1
-              className="reveal mt-3 font-display text-[clamp(2.9rem,8vw,5.4rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-white"
-              style={{ '--reveal-delay': '140ms' } as React.CSSProperties}
-            >
-              {hero.name}
-            </h1>
-
-            <p
-              className="reveal mt-4 font-display text-[clamp(1.6rem,4.2vw,2.6rem)] leading-tight font-semibold tracking-tight text-gradient"
-              style={{ '--reveal-delay': '220ms' } as React.CSSProperties}
-            >
-              {hero.role}
-            </p>
-
-            <p
-              className="reveal mt-6 max-w-xl text-[1.02rem] leading-relaxed text-white/78 text-pretty"
-              style={{ '--reveal-delay': '300ms' } as React.CSSProperties}
-            >
-              <span className="font-medium text-white/85">{hero.tagline}</span> {hero.intro}
-            </p>
-
-            <div
-              className="reveal mt-10 flex flex-wrap items-center gap-3"
-              style={{ '--reveal-delay': '380ms' } as React.CSSProperties}
-            >
-              <a
-                href="#experience"
-                className="group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-br from-dragonfruit to-dragonfruit-deep px-7 py-3.5 text-[0.95rem] font-semibold text-white shadow-[0_18px_40px_-16px_rgba(255,70,150,0.95)] transition-transform duration-300 hover:-translate-y-0.5"
-              >
-                {hero.primaryCta}
-                <Icon
-                  name="arrowRight"
-                  size={17}
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                />
-              </a>
-
-              <a
-                href={`mailto:${contact.email}`}
-                onPointerMove={trackGlassPointer}
-                className="glass glass-sheen glass-lens inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-[0.95rem] font-semibold text-white/85 transition-colors duration-300 hover:text-white"
-              >
-                <Icon name="mail" size={17} />
-                {hero.secondaryCta}
-              </a>
-            </div>
+        <div className="max-w-4xl">
+          <div className="reveal inline-flex items-center gap-2.5 rounded-full border border-emerald/25 bg-emerald/8 py-1.5 pr-4 pl-2.5">
+            <span
+              className="animate-pulse-ring grid h-1.5 w-1.5 place-items-center rounded-full bg-emerald"
+              style={{ '--pulse-color': 'var(--color-emerald)' } as CSSProperties}
+            />
+            <span className="text-[0.75rem] font-medium tracking-tight text-emerald">
+              {hero.availability}
+            </span>
           </div>
 
-          {/* ------------------------------------------- current-role card */}
-          <div className="relative">
-            <div
-              className="reveal relative"
-              style={{ '--reveal-delay': '260ms' } as React.CSSProperties}
+          {/* Technical slug line — role plus the competency keywords, set in
+              mono so it reads as metadata rather than prose. */}
+          <p
+            className="reveal mt-9 font-mono text-[0.72rem] leading-[1.9] tracking-[0.16em] text-violet-soft uppercase"
+            style={{ '--reveal-delay': '80ms' } as CSSProperties}
+          >
+            {hero.role}
+            <span className="text-white/20"> / </span>
+            <span className="text-white/35">{heroCard.focusAreas.join(' · ')}</span>
+          </p>
+
+          <h1
+            className="reveal mt-4 font-display text-[clamp(3.2rem,10vw,7rem)] leading-[0.92] font-semibold tracking-[-0.045em] text-white"
+            style={{ '--reveal-delay': '140ms' } as CSSProperties}
+          >
+            <WordFadeIn text={hero.name} />
+          </h1>
+
+          {/* Two-tone statement: the first clause stays white, the payoff
+              takes the accent, so the sentence has a visible emphasis. */}
+          <p
+            className="reveal mt-8 max-w-2xl font-display text-[clamp(1.35rem,2.8vw,2rem)] leading-[1.3] font-medium tracking-[-0.02em] text-pretty"
+            style={{ '--reveal-delay': '220ms' } as CSSProperties}
+          >
+            <span className="text-white">{taglineLead} </span>
+            <ShinyText text={taglineAccent} speed={4} />
+          </p>
+
+          <p
+            className="reveal mt-7 max-w-xl text-[0.98rem] leading-[1.7] text-white/45 text-pretty"
+            style={{ '--reveal-delay': '300ms' } as CSSProperties}
+          >
+            {hero.intro}
+          </p>
+
+          <div
+            className="reveal mt-10 flex flex-wrap items-center gap-3"
+            style={{ '--reveal-delay': '380ms' } as CSSProperties}
+          >
+            {/* White fill rather than a coloured gradient: on a dark page a
+                plain white pill reads as the most confident possible primary,
+                and it keeps the violet reserved for accents. */}
+            <a
+              href={`mailto:${contact.email}`}
+              className="inline-flex items-center gap-2.5 rounded-full bg-white px-6 py-3 text-[0.92rem] font-semibold text-night-deep transition-colors duration-300 hover:bg-white/90"
             >
-              <GlassCard className="relative overflow-hidden p-7 sm:p-8">
-                <div className="flex items-center gap-4">
-                  <span className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-dragonfruit via-dragonfruit-deep to-orchid font-display text-lg font-bold text-white shadow-[0_14px_34px_-12px_rgba(255,70,150,0.9)]">
-                    AO
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate font-display text-lg font-semibold text-white">
-                      {hero.name}
-                    </p>
-                    <p className="truncate text-sm text-dragonfruit-soft">{current.role}</p>
-                  </div>
-                </div>
+              <Icon name="mail" size={16} />
+              {hero.secondaryCta}
+            </a>
 
-                <div className="my-6 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent" />
-
-                <dl className="space-y-4">
-                  {[
-                    { icon: 'flow' as const, label: current.company, value: current.period },
-                    { icon: 'pin' as const, label: current.location, value: current.contract },
-                    {
-                      icon: 'badge' as const,
-                      label: content.certifications.items[0].issuer,
-                      value: 'PSPO II',
-                    },
-                    {
-                      icon: 'translate' as const,
-                      label: content.languages.title,
-                      value: content.languages.items.map((l) => l.level).join(' · '),
-                    },
-                  ].map((row) => (
-                    <div key={row.label} className="flex items-center gap-3.5">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/12 bg-white/6 text-dragonfruit-soft">
-                        <Icon name={row.icon} size={16} />
-                      </span>
-                      <dt className="min-w-0 flex-1 truncate text-sm text-white/70">{row.label}</dt>
-                      <dd className="shrink-0 text-sm font-medium text-white/90">{row.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-
-                <div className="mt-7 flex flex-wrap gap-2">
-                  {['Scrum', 'SAFe', 'Jira', 'Power BI', 'Figma'].map((tool) => (
-                    <Chip key={tool}>{tool}</Chip>
-                  ))}
-                </div>
-              </GlassCard>
-
-              {/* Floating accent glyphs */}
-              <div
-                aria-hidden="true"
-                className="animate-float-slow absolute -top-7 -right-5 hidden h-16 w-16 place-items-center rounded-2xl border border-white/16 bg-white/8 text-dragonfruit backdrop-blur-xl sm:grid"
-              >
-                <Icon name="target" size={26} />
-              </div>
-              <div
-                aria-hidden="true"
-                className="animate-float-slow absolute -bottom-6 -left-6 hidden h-14 w-14 place-items-center rounded-2xl border border-white/16 bg-white/8 text-orchid backdrop-blur-xl sm:grid"
-                style={{ animationDelay: '-4s' }}
-              >
-                <Icon name="spark" size={22} />
-              </div>
-            </div>
+            <a
+              href="#experience"
+              onPointerMove={trackGlassPointer}
+              className="group inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/6 px-6 py-3 text-[0.92rem] font-medium text-white/85 transition-colors duration-300 hover:border-white/30 hover:bg-white/10 hover:text-white"
+            >
+              {hero.primaryCta}
+              <Icon
+                name="arrowRight"
+                size={16}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </a>
           </div>
         </div>
 
-        {/* ------------------------------------------------------- stats */}
-        <div className="mt-16 grid grid-cols-2 gap-3 sm:gap-4 lg:mt-20 lg:grid-cols-4">
+        {/* --------------------------------------------------------- stats */}
+        <div
+          className="reveal mt-20 grid grid-cols-2 gap-y-8 border-t border-white/8 pt-10 lg:grid-cols-4 lg:gap-0"
+          style={{ '--reveal-delay': '120ms' } as CSSProperties}
+        >
           {hero.stats.map((stat, index) => (
-            <GlassCard
+            <div
               key={stat.label}
-              className="reveal px-5 py-6"
-              style={{ '--reveal-delay': `${index * 90}ms` } as React.CSSProperties}
+              className={`lg:px-8 lg:first:pl-0 ${index > 0 ? 'lg:border-l lg:border-white/8' : ''}`}
             >
-              <p className="font-display text-[clamp(1.6rem,3.4vw,2.2rem)] leading-none font-semibold text-gradient">
+              <p className="font-display text-[clamp(1.8rem,3.4vw,2.4rem)] leading-none font-semibold tracking-[-0.03em] text-white">
                 {stat.value}
               </p>
-              <p className="mt-2.5 text-[0.82rem] leading-snug text-white/55">{stat.label}</p>
-            </GlassCard>
+              <p className="mt-2.5 text-[0.82rem] leading-snug text-white/40">{stat.label}</p>
+            </div>
           ))}
         </div>
       </Container>
-
-      {/* Scroll hint */}
-      <a
-        href="#about"
-        className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-white/40 transition-colors hover:text-white/80 lg:flex"
-      >
-        <span className="text-[0.68rem] tracking-[0.24em] uppercase">{hero.scrollHint}</span>
-        <span className="relative h-9 w-px overflow-hidden bg-white/15">
-          <span className="absolute inset-x-0 top-0 h-3 animate-[float-slow_2.4s_ease-in-out_infinite] bg-dragonfruit" />
-        </span>
-      </a>
     </section>
   )
 }

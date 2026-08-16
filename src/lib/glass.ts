@@ -13,4 +13,4 @@ export function trackGlassPointer<T extends HTMLElement>(event: ReactPointerEven
 
 /** Base class list shared by every liquid-glass surface. */
 export const GLASS_SURFACE =
-  'glass glass-sheen glass-lens glass-panel transition-[transform,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
+  'glass glass-sheen glass-lens glass-panel transition-[transform,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]'
