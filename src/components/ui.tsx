@@ -56,9 +56,17 @@ interface SectionProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode
 }
 
+/**
+ * Vertical rhythm lives here, so it stays consistent across every section.
+ *
+ * Padding is deliberately modest: it lands on *both* sides of the boundary
+ * between two sections, so the visible gap is double whatever is set here.
+ * At the old py-32 that was 256px of dead space between every section — a
+ * quarter of a 1080p viewport, seven times over.
+ */
 export function Section({ id, className = '', children, ...rest }: SectionProps) {
   return (
-    <section id={id} className={`relative py-24 md:py-32 ${className}`} {...rest}>
+    <section id={id} className={`relative py-16 md:py-20 ${className}`} {...rest}>
       {children}
     </section>
   )

@@ -51,7 +51,7 @@ export function Hero() {
       ref={ref}
       /* Padding rather than flex centring: the hero is taller than the
          viewport on short screens, and centring would clip its top. */
-      className="relative flex min-h-screen flex-col justify-center pt-32 pb-24 md:pt-40 md:pb-28"
+      className="relative flex min-h-screen flex-col justify-center pt-32 pb-16 md:pt-36 md:pb-20"
     >
       <Container>
         <div className="max-w-4xl">
