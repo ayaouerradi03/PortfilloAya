@@ -38,12 +38,22 @@ You can also trigger a deploy by hand from the **Actions** tab
 
 ### ⚠️ Required one-time setup (repository admin only)
 
-**Before the first deploy can succeed, an admin of the repository must switch
-Pages on:**
+**Before the first deploy can succeed, an admin of the repository must set the
+Pages source to Actions:**
 
 > **Settings → Pages → Build and deployment → Source: `GitHub Actions`**
+>
+> Not `Deploy from a branch`.
 
 The repository must also be **Public**, unless the account is on a paid plan.
+
+> **Why the distinction matters.** With Source left on *Deploy from a branch*,
+> GitHub serves the repository **as-is** — the unbuilt `index.html`, whose only
+> script tag points at `/src/main.tsx`. Browsers will not execute raw
+> TypeScript, so React never mounts and the site renders as a **blank page**
+> that still returns HTTP 200. There is no error in the console pointing at the
+> cause, and `package.json`, `vite.config.ts` and `src/` end up publicly
+> served. Only a deploy from this workflow publishes the built `dist/`.
 
 This cannot be automated. The workflow does attempt it (`configure-pages` runs
 with `enablement: true`), but creating a Pages site requires repo-admin rights

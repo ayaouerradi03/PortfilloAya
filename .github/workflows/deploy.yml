@@ -63,29 +63,38 @@ jobs:
 
       # The raw API error above says nothing about what to actually do, so
       # translate it into the one-time manual step a repo owner has to take.
-      - name: Check Pages is enabled
+      # This covers both failure modes: Pages switched off entirely, and Pages
+      # switched on but pointed at a branch instead of Actions — the latter
+      # silently serves the repository source, so the site loads as a blank
+      # page with no error anywhere.
+      - name: Check Pages source
         if: steps.pages.outcome == 'failure'
         run: |
-          echo "::error title=GitHub Pages is not enabled::Pages must be switched on once by a repository admin."
+          echo "::error title=GitHub Pages source is not set to Actions::A repository admin must set Settings → Pages → Source to 'GitHub Actions'."
           cat <<'MSG'
 
           ────────────────────────────────────────────────────────────────
-           GitHub Pages is not enabled on this repository.
+           This workflow cannot publish, because GitHub Pages is either off
+           or set to deploy from a branch rather than from Actions.
 
-           The workflow tried to enable it automatically and was refused —
-           creating a Pages site needs repo-admin rights that the Actions
-           token cannot hold.
+           It tried to correct that automatically and was refused: changing
+           the Pages source needs repo-admin rights the Actions token
+           cannot hold.
 
-           A repository ADMIN (the owner) has to do this once:
+           A repository ADMIN (the owner) has to set this once:
 
              Settings → Pages → Build and deployment
-             Source:  GitHub Actions
+             Source:  GitHub Actions          <-- not "Deploy from a branch"
 
            The repository must also be Public, unless the account is on a
            paid plan.
 
-           Re-run this workflow afterwards and it will deploy. Nothing in
-           the code needs to change.
+           NOTE: if Source is left on "Deploy from a branch", the site will
+           still return HTTP 200 — but it serves the raw repository (the
+           unbuilt index.html, package.json, src/ ...), which renders as a
+           BLANK PAGE. A working deploy must come from this workflow.
+
+           Re-run this workflow afterwards. Nothing in the code changes.
           ────────────────────────────────────────────────────────────────
 
           MSG
