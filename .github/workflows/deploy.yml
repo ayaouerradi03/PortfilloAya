@@ -44,14 +44,52 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      # enablement: true turns Pages on via the API if it has not been switched
-      # on in Settings yet. Without it the run dies with "Get Pages site failed
-      # … Not Found", which is a blocker for anyone who lacks admin rights on
-      # the repository and so cannot flip that setting by hand.
+      # enablement: true asks the API to switch Pages on if it is still off.
+      # It only succeeds where the workflow token is allowed to create a Pages
+      # site; GITHUB_TOKEN cannot be granted the admin rights that call needs,
+      # so on most repositories this is a no-op that fails with "Resource not
+      # accessible by integration". It is kept because it costs nothing once
+      # Pages *is* on (the action just reads the existing config), and because
+      # it works on setups where the token is permitted.
+      #
+      # continue-on-error lets the clearer message in the next step be the one
+      # that actually stops the run.
       - name: Configure Pages
+        id: pages
+        continue-on-error: true
         uses: actions/configure-pages@v5
         with:
           enablement: true
+
+      # The raw API error above says nothing about what to actually do, so
+      # translate it into the one-time manual step a repo owner has to take.
+      - name: Check Pages is enabled
+        if: steps.pages.outcome == 'failure'
+        run: |
+          echo "::error title=GitHub Pages is not enabled::Pages must be switched on once by a repository admin."
+          cat <<'MSG'
+
+          ────────────────────────────────────────────────────────────────
+           GitHub Pages is not enabled on this repository.
+
+           The workflow tried to enable it automatically and was refused —
+           creating a Pages site needs repo-admin rights that the Actions
+           token cannot hold.
+
+           A repository ADMIN (the owner) has to do this once:
+
+             Settings → Pages → Build and deployment
+             Source:  GitHub Actions
+
+           The repository must also be Public, unless the account is on a
+           paid plan.
+
+           Re-run this workflow afterwards and it will deploy. Nothing in
+           the code needs to change.
+          ────────────────────────────────────────────────────────────────
+
+          MSG
+          exit 1
 
       # The base path has to match the repo name, because a project page is
       # served from /<repo>/ rather than the domain root. Deriving it from the

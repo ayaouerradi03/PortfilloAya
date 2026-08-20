@@ -3,8 +3,7 @@
 Bilingual (FR/EN) portfolio for Aya Ouerradi, AI Product Owner.
 Built with React 19, Vite and Tailwind CSS v4.
 
-**Live:** `https://<owner>.github.io/<repo-name>/` — currently
-https://soufianetiraoui.github.io/PortfilloAya/
+**Live:** https://ayaouerradi03.github.io/PortfilloAya/
 
 The URL follows whichever account hosts the repository; the build adapts to it
 automatically (see [The base path](#the-base-path)).
@@ -37,19 +36,25 @@ version.
 You can also trigger a deploy by hand from the **Actions** tab
 (**Deploy to GitHub Pages → Run workflow**) without pushing a commit.
 
-### Enabling Pages
+### ⚠️ Required one-time setup (repository admin only)
 
-The workflow turns Pages on by itself — `actions/configure-pages` runs with
-`enablement: true`, so no one needs admin rights on the repository to get the
-first deploy working.
+**Before the first deploy can succeed, an admin of the repository must switch
+Pages on:**
 
-If that step ever fails with *"Get Pages site failed … Not Found"*, the
-repository owner can enable it by hand instead:
+> **Settings → Pages → Build and deployment → Source: `GitHub Actions`**
 
-**Settings → Pages → Build and deployment → Source: `GitHub Actions`**
+The repository must also be **Public**, unless the account is on a paid plan.
 
-The repository also has to be **public** — Pages on a private repository
-requires a paid GitHub plan.
+This cannot be automated. The workflow does attempt it (`configure-pages` runs
+with `enablement: true`), but creating a Pages site requires repo-admin rights
+that the Actions `GITHUB_TOKEN` cannot be granted — the API rejects it with
+*"Resource not accessible by integration"*. Collaborators without admin rights
+cannot do it either; it has to be the owner.
+
+Until it is done, every run fails at the **Check Pages is enabled** step, which
+prints these instructions in the log. Once done, re-run the workflow from the
+Actions tab — no code change is needed, and all later pushes deploy on their
+own.
 
 ### The base path
 
