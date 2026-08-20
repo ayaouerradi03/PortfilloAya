@@ -8,8 +8,9 @@ on:
   workflow_dispatch:
 
 # Permissions required by the Pages deployment action. `id-token` is what lets
-# deploy-pages authenticate without a personal access token, and `pages: write`
-# is what allows the enablement step below to turn Pages on by itself.
+# deploy-pages authenticate without a personal access token. Note that
+# `pages: write` allows *deploying* to Pages but not reconfiguring the site —
+# that needs repo-admin, which a workflow token cannot be given.
 permissions:
   contents: read
   pages: write
@@ -44,22 +45,18 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      # enablement: true asks the API to switch Pages on if it is still off.
-      # It only succeeds where the workflow token is allowed to create a Pages
-      # site; GITHUB_TOKEN cannot be granted the admin rights that call needs,
-      # so on most repositories this is a no-op that fails with "Resource not
-      # accessible by integration". It is kept because it costs nothing once
-      # Pages *is* on (the action just reads the existing config), and because
-      # it works on setups where the token is permitted.
+      # Deliberately NOT using `enablement: true`.
       #
-      # continue-on-error lets the clearer message in the next step be the one
-      # that actually stops the run.
+      # That option makes this action write to the Pages site config, which
+      # needs repo-admin rights the Actions token cannot hold — so it fails
+      # with "Resource not accessible by integration" even when Pages is
+      # already configured correctly, taking the whole deploy down with it.
+      # Without it the action only *reads* the config, which the token may do,
+      # so the run proceeds whenever Pages is set to build from Actions.
       - name: Configure Pages
         id: pages
         continue-on-error: true
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       # The raw API error above says nothing about what to actually do, so
       # translate it into the one-time manual step a repo owner has to take.
@@ -77,9 +74,8 @@ jobs:
            This workflow cannot publish, because GitHub Pages is either off
            or set to deploy from a branch rather than from Actions.
 
-           It tried to correct that automatically and was refused: changing
-           the Pages source needs repo-admin rights the Actions token
-           cannot hold.
+           This cannot be corrected from the workflow — changing the Pages
+           source needs repo-admin rights the Actions token cannot hold.
 
            A repository ADMIN (the owner) has to set this once:
 

@@ -55,11 +55,15 @@ The repository must also be **Public**, unless the account is on a paid plan.
 > cause, and `package.json`, `vite.config.ts` and `src/` end up publicly
 > served. Only a deploy from this workflow publishes the built `dist/`.
 
-This cannot be automated. The workflow does attempt it (`configure-pages` runs
-with `enablement: true`), but creating a Pages site requires repo-admin rights
-that the Actions `GITHUB_TOKEN` cannot be granted — the API rejects it with
-*"Resource not accessible by integration"*. Collaborators without admin rights
-cannot do it either; it has to be the owner.
+This cannot be automated. Changing the Pages source needs repo-admin rights
+that the Actions `GITHUB_TOKEN` cannot be granted — the API rejects the attempt
+with *"Resource not accessible by integration"*. Collaborators without admin
+rights cannot do it either; it has to be the owner.
+
+(For the same reason `configure-pages` is deliberately run *without*
+`enablement: true`: that option makes it try to write the site config, which
+fails on the same permission even when Pages is already set up correctly, and
+takes the whole deploy down with it.)
 
 Until it is done, every run fails at the **Check Pages is enabled** step, which
 prints these instructions in the log. Once done, re-run the workflow from the
