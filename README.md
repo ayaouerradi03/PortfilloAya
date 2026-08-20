@@ -42,7 +42,7 @@ GitHub Pages must be told to accept deployments from Actions. In the repo:
 The first push after that publishes the site. The repository also needs to be
 **public** — Pages on a private repository requires a paid GitHub plan.
 
-### The base path
+### The base pat
 
 The site is a GitHub Pages *project* page, served from a subdirectory
 (`/PortfilloAya/`) rather than the domain root. Vite therefore builds every
