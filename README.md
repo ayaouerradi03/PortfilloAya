@@ -3,7 +3,11 @@
 Bilingual (FR/EN) portfolio for Aya Ouerradi, AI Product Owner.
 Built with React 19, Vite and Tailwind CSS v4.
 
-**Live:** https://soufianetiraoui.github.io/PortfilloAya/
+**Live:** `https://<owner>.github.io/<repo-name>/` — currently
+https://soufianetiraoui.github.io/PortfilloAya/
+
+The URL follows whichever account hosts the repository; the build adapts to it
+automatically (see [The base path](#the-base-path)).
 
 ## Local development
 
@@ -33,28 +37,39 @@ version.
 You can also trigger a deploy by hand from the **Actions** tab
 (**Deploy to GitHub Pages → Run workflow**) without pushing a commit.
 
-### One-time setup
+### Enabling Pages
 
-GitHub Pages must be told to accept deployments from Actions. In the repo:
+The workflow turns Pages on by itself — `actions/configure-pages` runs with
+`enablement: true`, so no one needs admin rights on the repository to get the
+first deploy working.
+
+If that step ever fails with *"Get Pages site failed … Not Found"*, the
+repository owner can enable it by hand instead:
 
 **Settings → Pages → Build and deployment → Source: `GitHub Actions`**
 
-The first push after that publishes the site. The repository also needs to be
-**public** — Pages on a private repository requires a paid GitHub plan.
+The repository also has to be **public** — Pages on a private repository
+requires a paid GitHub plan.
 
-### The base pat
+### The base path
 
-The site is a GitHub Pages *project* page, served from a subdirectory
-(`/PortfilloAya/`) rather than the domain root. Vite therefore builds every
-asset URL with that prefix — without it the CSS, JS and favicon all 404 on the
-live site while working perfectly in local dev.
+A GitHub Pages *project* page is served from a subdirectory (`/<repo-name>/`)
+rather than the domain root, so every built asset URL needs that prefix.
+Without it the CSS, JS and favicon all 404 on the live site while working
+perfectly in local dev.
 
-That prefix is applied to production builds only, so `npm run dev` stays on
-`/`. It lives in `vite.config.ts` and can be overridden:
+The workflow derives the prefix from the repository itself rather than
+hardcoding it, so **renaming the repo or transferring it to another account
+needs no change here** — the next deploy just picks up the new name. A
+`<owner>.github.io` repository is a user page served from the root, and is
+handled as a special case.
+
+The prefix applies to production builds only, so `npm run dev` stays on `/`.
+Building locally uses the default in `vite.config.ts`, which can be overridden:
 
 ```bash
-# Moving to a user page (soufianetiraoui.github.io) or a custom domain:
-BASE_PATH=/ npm run build
+BASE_PATH=/ npm run build            # user page or custom domain
+BASE_PATH=/some-other-name/ npm run build
 ```
 
 If you rename the repository, update the default in `vite.config.ts` to match

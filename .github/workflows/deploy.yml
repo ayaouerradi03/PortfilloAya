@@ -8,13 +8,14 @@ on:
   workflow_dispatch:
 
 # Permissions required by the Pages deployment action. `id-token` is what lets
-# deploy-pages authenticate without a personal access token.
+# deploy-pages authenticate without a personal access token, and `pages: write`
+# is what allows the enablement step below to turn Pages on by itself.
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# If you push twice quickly, cancel the older run rather than racing it — but
+# If you push twice quickly, queue the runs rather than racing them — but
 # never cancel a deploy that is already mid-flight.
 concurrency:
   group: pages
@@ -38,16 +39,37 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Fails the deploy on a type error or lint violation, so a broken build
-      # never reaches the public URL.
+      # Fails the deploy on a lint violation, so a broken build never reaches
+      # the public URL. `npm run build` type-checks via `tsc -b` as well.
       - name: Lint
         run: npm run lint
 
-      - name: Build
-        run: npm run build
-
+      # enablement: true turns Pages on via the API if it has not been switched
+      # on in Settings yet. Without it the run dies with "Get Pages site failed
+      # … Not Found", which is a blocker for anyone who lacks admin rights on
+      # the repository and so cannot flip that setting by hand.
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # The base path has to match the repo name, because a project page is
+      # served from /<repo>/ rather than the domain root. Deriving it from the
+      # repository context instead of hardcoding it means this keeps working if
+      # the project is renamed or transferred to another account — including to
+      # Aya's — with no edit to the config. A <owner>.github.io repo is a user
+      # page served from the root, so it is special-cased to "/".
+      - name: Build
+        run: |
+          repo='${{ github.event.repository.name }}'
+          owner='${{ github.repository_owner }}'
+          if [ "$(printf '%s' "$repo" | tr '[:upper:]' '[:lower:]')" = "$(printf '%s' "$owner" | tr '[:upper:]' '[:lower:]').github.io" ]; then
+            export BASE_PATH='/'
+          else
+            export BASE_PATH="/$repo/"
+          fi
+          echo "Building with BASE_PATH=$BASE_PATH"
+          npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
